@@ -45,7 +45,7 @@ void updateCAN()
   utils.ActionsWrite();
   canMsgWrite.can_id = CAN_ADDRESS;
   canMsgWrite.can_dlc = 8; 
-   
+
   if (utils.GetNotAus() == 1)
   {
     utils.SetNotAus(0);
@@ -81,3 +81,6 @@ DAVE 0xEF = Motor und Temperatur
 SPECKI 0xAA = NotAus und Bildschirm 
 
 */
+
+
+//This is a test
