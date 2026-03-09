@@ -10,7 +10,7 @@
 
 unsigned long Zeit = 0;
 
-Utils utils(8, 9);
+Utils utils(8, 6);
 
 struct can_frame canMsgWrite;
 struct can_frame canMsgRead;
@@ -37,8 +37,8 @@ void loop()
   readCAN();
   if (millis() - Zeit >= Intervall)
   {
-    
-    updateCAN();  
+
+    updateCAN();
 
     Zeit = millis();
   }
@@ -56,7 +56,7 @@ void updateCAN()
   }
 
   canMsgWrite.data[0] = utils.GetStartStop();
-  Serial.println(utils.GetStartStop());
+ // Serial.println(utils.GetStartStop());
 
   mcp2515.sendMessage(&canMsgWrite);
 }
@@ -72,6 +72,7 @@ void readCAN()
     case (NOTAUS_ADDRESS):
     {
       utils.SetNotAus(canMsgRead.data[0]);
+      Serial.println(utils.GetNotAus());
       break;
     }
 
