@@ -3,8 +3,8 @@
 #include <mcp2515.h>
 #include "Utils.h"
 
-#define CAN_ADDRESS 0xBA
-#define NOTAUS_ADDRESS 0xAA
+#define CAN_ADDRESS 0x01
+#define NOTAUS_ADDRESS 0x00
 
 #define Intervall 100
 
@@ -34,10 +34,11 @@ void setup()
 
 void loop()
 {
+  readCAN();
   if (millis() - Zeit >= Intervall)
   {
-    updateCAN();
-    readCAN();
+    
+    updateCAN();  
 
     Zeit = millis();
   }
@@ -81,9 +82,9 @@ void readCAN()
 }
 
 /*
-NOAH 0xBA = Start/Stop und Buzzer
-LUKA 0xCE = StatusLed und Lichtschranke
-DAVE 0xEF = Motor und Temperatur
-SPECKI 0xAA = NotAus und Bildschirm
+NOAH 0x01 = Start/Stop und Buzzer
+LUKA 0x02 = StatusLed und Lichtschranke
+DAVE 0x04 = Motor und Temperatur
+SPECKI 0x00 = NotAus und Bildschirm
 
 */
