@@ -3,8 +3,12 @@
 #include <mcp2515.h>
 #include "Utils.h"
 
-#define CAN_ADDRESS     0xBA
-#define NOTAUS_ADDRESS  0xAA
+#define CAN_ADDRESS 0xBA
+#define NOTAUS_ADDRESS 0xAA
+
+#define Intervall 100
+
+unsigned long Zeit = 0;
 
 Utils utils(8, 9);
 
@@ -16,8 +20,7 @@ void updateCAN();
 void readCAN();
 
 void setup()
-{  
-
+{
   while (!Serial)
     ;
   Serial.begin(115200);
@@ -31,20 +34,20 @@ void setup()
 
 void loop()
 {
+  if (millis() - Zeit >= Intervall)
+  {
+    updateCAN();
+    readCAN();
 
-  updateCAN();
-  readCAN();
-
-  
-
-  delay(100);
+    Zeit = millis();
+  }
 }
 
 void updateCAN()
 {
   utils.ActionsWrite();
   canMsgWrite.can_id = CAN_ADDRESS;
-  canMsgWrite.can_dlc = 8; 
+  canMsgWrite.can_dlc = 8;
 
   if (utils.GetNotAus() == 1)
   {
@@ -57,20 +60,23 @@ void updateCAN()
   mcp2515.sendMessage(&canMsgWrite);
 }
 
-void readCAN() {
+void readCAN()
+{
   utils.ActionsRead();
-  if (mcp2515.readMessage(&canMsgRead) == MCP2515::ERROR_OK) {
-    
-    switch(canMsgRead.can_id)
+  if (mcp2515.readMessage(&canMsgRead) == MCP2515::ERROR_OK)
+  {
+
+    switch (canMsgRead.can_id)
     {
-    case (NOTAUS_ADDRESS): {
+    case (NOTAUS_ADDRESS):
+    {
       utils.SetNotAus(canMsgRead.data[0]);
       break;
     }
-    
+
     default:
       break;
-    }     
+    }
   }
 }
 
@@ -78,9 +84,6 @@ void readCAN() {
 NOAH 0xBA = Start/Stop und Buzzer
 LUKA 0xCE = StatusLed und Lichtschranke
 DAVE 0xEF = Motor und Temperatur
-SPECKI 0xAA = NotAus und Bildschirm 
+SPECKI 0xAA = NotAus und Bildschirm
 
 */
-
-
-//This is a test
