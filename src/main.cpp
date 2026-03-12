@@ -10,7 +10,7 @@
 
 unsigned long Zeit = 0;
 
-Utils utils(8, 6);
+Utils utils(8, 9); // StartStop Pin 8, Buzzer Pin 9
 
 struct can_frame canMsgWrite;
 struct can_frame canMsgRead;
@@ -21,71 +21,47 @@ void readCAN();
 
 void setup()
 {
-  while (!Serial)
-    ;
   Serial.begin(115200);
-
+  
+  // FIX: Initialize hardware here, not globally!
+  utils.begin(); 
+  
   mcp2515.reset();
   mcp2515.setBitrate(CAN_125KBPS);
   mcp2515.setNormalMode();
 
-  Serial.println("Example: Write to CAN");
+  Serial.println("Arduino 1 Started");
 }
 
 void loop()
 {
+  utils.ActionsWrite(); // Check buttons
+  utils.ActionsRead();  // Update buzzer state
+  
   readCAN();
+
   if (millis() - Zeit >= Intervall)
   {
-
-    updateCAN();
-
+    updateCAN();  
     Zeit = millis();
   }
 }
 
 void updateCAN()
 {
-  utils.ActionsWrite();
   canMsgWrite.can_id = CAN_ADDRESS;
-  canMsgWrite.can_dlc = 8;
-
-  if (utils.GetNotAus() == 1)
-  {
-    utils.SetNotAus(0);
-  }
-
+  canMsgWrite.can_dlc = 1;
   canMsgWrite.data[0] = utils.GetStartStop();
- // Serial.println(utils.GetStartStop());
-
   mcp2515.sendMessage(&canMsgWrite);
 }
 
 void readCAN()
 {
-  utils.ActionsRead();
   if (mcp2515.readMessage(&canMsgRead) == MCP2515::ERROR_OK)
   {
-
-    switch (canMsgRead.can_id)
-    {
-    case (NOTAUS_ADDRESS):
+    if (canMsgRead.can_id == NOTAUS_ADDRESS)
     {
       utils.SetNotAus(canMsgRead.data[0]);
-      Serial.println(utils.GetNotAus());
-      break;
-    }
-
-    default:
-      break;
     }
   }
 }
-
-/*
-NOAH 0x01 = Start/Stop und Buzzer
-LUKA 0x02 = StatusLed und Lichtschranke
-DAVE 0x04 = Motor und Temperatur
-SPECKI 0x00 = NotAus und Bildschirm
-
-*/
