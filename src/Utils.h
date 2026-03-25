@@ -1,75 +1,60 @@
-#include <Arduino.h>
-#include <Bounce2.h>
-
 #ifndef UTILS_H
 #define UTILS_H
 
-Bounce Taster;
+#include <Arduino.h>
+#include <Bounce2.h>
 
 class Utils
 {
 private:
     bool wStartStop = false;
     bool wNotAus = false;
-
     int StartStop = 0;
     int Buzzer = 0;
+    Bounce Taster;
 
 public:
-    void SetNotAus(int TasterNotAus)
-    {
-        wNotAus = TasterNotAus;
-    }
-
-    uint8_t GetNotAus()
-    {
-        return wNotAus;
-    }
-
-    void SetStartStop(int TasterStartStop)
-    {
-        wStartStop = TasterStartStop;
-    }
-
-    uint8_t GetStartStop()
-    {
-        return wStartStop;
-    }
-    
-    Utils()
-    {
-    }
+    Utils() {}
 
     Utils(int StartStop, int Buzzer)
     {
         this->StartStop = StartStop;
         this->Buzzer = Buzzer;
+    }
 
-        pinMode(this->StartStop, INPUT);
+    // FIX: Hardware setup moved here
+    void begin() 
+    {
+        pinMode(this->StartStop, INPUT); // Expects external pulldown resistor
+        pinMode(this->Buzzer, OUTPUT);
 
-        Taster.attach(StartStop);
+        Taster.attach(this->StartStop);
         Taster.interval(30);
     }
+
+    void SetNotAus(int TasterNotAus) { wNotAus = TasterNotAus; }
+    uint8_t GetNotAus() { return wNotAus; }
+
+    void SetStartStop(int TasterStartStop) { wStartStop = TasterStartStop; }
+    uint8_t GetStartStop() { return wStartStop; }
 
     void ActionsWrite()
     {
         Taster.update();
-        if (Taster.rose())
+        if (Taster.rose()) // Toggle when button is pressed
         {
             wStartStop = !wStartStop;
         }
     }
+
     void ActionsRead()
     {
-        if (wNotAus == true)
-        {
-            digitalWrite(Buzzer, HIGH);
-        }
-        else
-        {
-            digitalWrite(Buzzer, LOW);
+        if (wNotAus) {
+            tone(Buzzer, 100);
+        } else {
+            noTone(Buzzer);
         }
     }
 };
 
-#endif UTILS_H
+#endif // UTILS_H
